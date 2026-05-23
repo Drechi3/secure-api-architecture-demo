@@ -1,38 +1,32 @@
 ![DevSecOps](https://img.shields.io/badge/DevSecOps-Practitioner-blue)
 ![API Security](https://img.shields.io/badge/API-Security-green)
 ![Cloud Security](https://img.shields.io/badge/Cloud-Security-red)
-# Secure API Architecture Demo
+# Secure API Authentication Demo
 
-This project demonstrates a secure API design using Node.js concepts, JWT authentication structure, and DevSecOps principles.
+This project demonstrates a simple authentication system using Node.js and Express.
 
-## What This Project Shows
+## Features
+- Public route (/api/home)
+- Login system (/api/login)
+- Protected route with token check (/api/protected)
+- Simple Bearer token authentication simulation
 
-* API security thinking
-* Authentication structure (JWT concept)
-* Middleware-based protection design
-* Secure backend architecture planning
-* DevSecOps mindset
+## How It Works
 
-## Architecture Overview
+1. User sends login request with credentials
+2. Server returns a token if credentials are valid
+3. Token is required to access protected routes
+4. Invalid or missing token blocks access
 
-Client → Middleware → Authentication Layer → Protected API → Response
+## Test Users
+- alice / password123 (admin)
+- bob / hunter2 (viewer)
 
-## Security Principles
+## Security Concepts Demonstrated
+- Authentication flow
+- Authorization using tokens
+- Secure route protection
+- Error handling for unauthorized access
 
-* Zero Trust mindset
-* Least privilege access
-* Secure request validation design
-* Token-based authentication concept
-
-## Threat Model
-
-* Unauthorized access attempts
-* Token misuse
-* API abuse risks
-* Privilege escalation risks
-
-## Author
-
-David Ugochukwu
-DevSecOps & Cloud Security Technical Writer
-Published on DZone, EM360, StartupNation
+## Purpose
+This project is part of my DevSecOps and API security learning portfolio.
