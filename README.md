@@ -45,3 +45,17 @@ GET /api/protected
 
 ## Purpose
 This project is part of my DevSecOps and API security learning portfolio, demonstrating backend security architecture fundamentals.
+
+## How to Run
+
+1. Start server:
+node index.js
+
+2. Open:
+GET /api/home
+
+3. Login:
+POST /api/login
+
+4. Access protected route:
+GET /api/protected with Bearer token
