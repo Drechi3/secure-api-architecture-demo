@@ -1,3 +1,6 @@
+![DevSecOps](https://img.shields.io/badge/DevSecOps-Practitioner-blue)
+![API Security](https://img.shields.io/badge/API-Security-green)
+![Cloud Security](https://img.shields.io/badge/Cloud-Security-red)
 # Secure API Architecture Demo
 
 This project demonstrates a secure API design using Node.js concepts, JWT authentication structure, and DevSecOps principles.
