@@ -3,18 +3,18 @@ const app = express();
 
 app.use(express.json());
 
-// USERS DATABASE (fake)
+// fake users
 const users = {
   alice: { password: "password123", role: "admin" },
   bob: { password: "hunter2", role: "viewer" }
 };
 
-// HOME ROUTE
+// home route
 app.get("/api/home", (req, res) => {
-  res.send("API is working");
+  res.send("Secure API Running");
 });
 
-// LOGIN ROUTE
+// login
 app.post("/api/login", (req, res) => {
   const { username, password } = req.body;
 
@@ -27,7 +27,7 @@ app.post("/api/login", (req, res) => {
   res.json({ token });
 });
 
-// AUTH MIDDLEWARE
+// auth middleware
 function auth(req, res, next) {
   const header = req.headers.authorization;
 
@@ -42,12 +42,11 @@ function auth(req, res, next) {
   next();
 }
 
-// PROTECTED ROUTE
+// protected route
 app.get("/api/protected", auth, (req, res) => {
   res.send("protected data accessed");
 });
 
-// START SERVER
 app.listen(3000, () => {
   console.log("Server running on port 3000");
 });
