@@ -7,6 +7,10 @@
 ## Overview
 This project demonstrates a secure backend API built with Node.js and Express, implementing authentication and authorization concepts commonly used in production systems.
 
+## Architecture Overview
+
+Client → Express Server → Authentication Layer → Protected Routes → Response
+
 ## Features
 - Public endpoint (/api/home)
 - User authentication (/api/login)
