@@ -1,32 +1,42 @@
 ![DevSecOps](https://img.shields.io/badge/DevSecOps-Practitioner-blue)
 ![API Security](https://img.shields.io/badge/API-Security-green)
 ![Cloud Security](https://img.shields.io/badge/Cloud-Security-red)
-# Secure API Authentication Demo
+# Secure API Authentication System (DevSecOps Project)
 
-This project demonstrates a simple authentication system using Node.js and Express.
+## Overview
+This project demonstrates a secure backend API built with Node.js and Express, implementing authentication and authorization concepts commonly used in production systems.
 
 ## Features
-- Public route (/api/home)
-- Login system (/api/login)
-- Protected route with token check (/api/protected)
-- Simple Bearer token authentication simulation
+- Public endpoint (/api/home)
+- User authentication (/api/login)
+- Protected route (/api/protected)
+- Token-based access control (mock JWT system)
+- Role-based user structure (admin / viewer)
+- ES Module architecture (modern Node.js setup)
 
-## How It Works
+## Test Flow
 
-1. User sends login request with credentials
-2. Server returns a token if credentials are valid
-3. Token is required to access protected routes
-4. Invalid or missing token blocks access
+1. Login:
+POST /api/login  
+{ "username": "alice", "password": "password123" }
 
-## Test Users
-- alice / password123 (admin)
-- bob / hunter2 (viewer)
+2. Use token:
+Authorization: Bearer <token>
+
+3. Access protected route:
+GET /api/protected
 
 ## Security Concepts Demonstrated
-- Authentication flow
-- Authorization using tokens
-- Secure route protection
-- Error handling for unauthorized access
+- Authentication vs Authorization
+- Token-based security flow
+- Role-based access design
+- Secure route handling
+- Error response consistency
+
+## Tech Stack
+- Node.js
+- Express.js
+- JavaScript (ES Modules)
 
 ## Purpose
-This project is part of my DevSecOps and API security learning portfolio.
+This project is part of my DevSecOps and API security learning portfolio, demonstrating backend security architecture fundamentals.
