@@ -1,100 +1,71 @@
-const express = require("express");
-const dotenv = require("dotenv");
-const jwt = require("jsonwebtoken");
-
-dotenv.config();
+import express from "express";
+import jwt from "jsonwebtoken";
 
 const app = express();
 
 app.use(express.json());
 
-/**
- * HOME ROUTE
- */
+// ENV setup
+const PORT = process.env.PORT || 3000;
+const JWT_SECRET = process.env.JWT_SECRET || "defaultsecret";
+
+// -------------------
+// Home Route (IMPORTANT for Render)
+// -------------------
 app.get("/", (req, res) => {
-  res.send("Secure API (JWT + Docker + DevSecOps Ready) 🚀");
+  res.json({ message: "Secure API is running 🚀" });
 });
 
-/**
- * PUBLIC ROUTE
- */
-app.get("/api/home", (req, res) => {
-  res.json({
-    message: "Welcome to Secure DevSecOps API",
-  });
-});
-
-/**
- * LOGIN ROUTE (REAL JWT)
- */
+// -------------------
+// Login Route (mock auth)
+// -------------------
 app.post("/api/login", (req, res) => {
-  const { username, password } = req.body;
+  const { username, role } = req.body;
 
-  if (username === "alice" && password === "password123") {
-    const token = jwt.sign(
-      {
-        username,
-        role: "admin",
-      },
-      process.env.JWT_SECRET,
-      { expiresIn: "1h" }
-    );
+  const token = jwt.sign(
+    { username, role },
+    JWT_SECRET,
+    { expiresIn: "1h" }
+  );
 
-    return res.json({ token });
-  }
-
-  return res.status(401).json({
-    message: "Invalid credentials",
-  });
+  res.json({ token });
 });
 
-/**
- * AUTH MIDDLEWARE
- */
-function verifyToken(req, res, next) {
-  const authHeader = req.headers.authorization;
+// -------------------
+// Middleware (JWT check)
+// -------------------
+function authenticateToken(req, res, next) {
+  const authHeader = req.headers["authorization"];
 
-  if (!authHeader) {
-    return res.status(401).json({
-      message: "No token provided",
-    });
+  const token = authHeader && authHeader.split(" ")[1];
+
+  if (!token) {
+    return res.status(401).json({ message: "No token provided" });
   }
 
-  const token = authHeader.split(" ")[1];
+  jwt.verify(token, JWT_SECRET, (err, user) => {
+    if (err) {
+      return res.status(403).json({ message: "Invalid or expired token" });
+    }
 
-  try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    req.user = decoded;
+    req.user = user;
     next();
-  } catch (err) {
-    return res.status(403).json({
-      message: "Invalid or expired token",
-    });
-  }
+  });
 }
 
-/**
- * PROTECTED ROUTE
- */
-app.get("/api/protected", verifyToken, (req, res) => {
+// -------------------
+// Protected Route
+// -------------------
+app.get("/api/protected", authenticateToken, (req, res) => {
   res.json({
     message: "Protected data accessed successfully 🔐",
-    user: req.user,
+    user: req.user
   });
 });
 
-/**
- * HEALTH CHECK
- */
-app.get("/health", (req, res) => {
-  res.json({ status: "OK" });
-});
-
-/**
- * START SERVER
- */
-const PORT = process.env.PORT || 3000;
-
+// -------------------
+// Start Server
+// -------------------
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
