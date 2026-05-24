@@ -1,43 +1,63 @@
-# Secure API Authentication System (DevSecOps Portfolio Project)
+import express from "express";
+import dotenv from "dotenv";
 
-![DevSecOps](https://img.shields.io/badge/DevSecOps-Practitioner-blue)
-![API Security](https://img.shields.io/badge/API-Security-green)
-![Cloud Security](https://img.shields.io/badge/Cloud-Security-red)
+dotenv.config();
 
----
+const app = express();
 
-## 📌 Overview
-This project demonstrates a secure backend API built with Node.js and Express, focusing on authentication, authorization, and API security principles used in production systems.
+app.use(express.json());
 
----
+// Home route
+app.get("/", (req, res) => {
+  res.send("Secure API is running inside Docker");
+});
 
-## 🏗️ Architecture
+// Public API route
+app.get("/api/home", (req, res) => {
+  res.json({
+    message: "Welcome to the Secure DevSecOps API Project",
+  });
+});
 
-Client → Express Server → Authentication Middleware → Protected Routes → Response
+// Mock login route
+app.post("/api/login", (req, res) => {
+  const { username, password } = req.body;
 
----
+  if (username === "alice" && password === "password123") {
+    return res.json({
+      token: "mock-jwt-token",
+      role: "admin",
+    });
+  }
 
-## ⚙️ Features
-- Public endpoint (`/api/home`)
-- User authentication (`/api/login`)
-- Protected route (`/api/protected`)
-- Token-based access control (mock JWT system)
-- Role-based user structure (admin / viewer)
-- ES Module architecture
+  return res.status(401).json({
+    message: "Invalid credentials",
+  });
+});
 
----
+// Protected route
+app.get("/api/protected", (req, res) => {
+  const authHeader = req.headers.authorization;
 
-## 🔐 Security Concepts Demonstrated
-- Authentication vs Authorization
-- Token-based security flow
-- Role-based access control
-- Secure route handling
-- Consistent error responses
+  if (!authHeader) {
+    return res.status(401).json({
+      message: "Access denied. No token provided.",
+    });
+  }
 
----
+  if (authHeader !== "Bearer mock-jwt-token") {
+    return res.status(403).json({
+      message: "Invalid token",
+    });
+  }
 
-## 🧪 Test Flow
+  res.json({
+    message: "Protected data accessed successfully",
+  });
+});
 
-### 1. Login
-```http
-POST /api/login
+const PORT = process.env.PORT || 3000;
+
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
+});
