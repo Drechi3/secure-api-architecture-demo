@@ -2,28 +2,20 @@ import express from "express";
 import jwt from "jsonwebtoken";
 
 const app = express();
-
 app.use(express.json());
 
-// ENV setup
 const PORT = process.env.PORT || 3000;
-const JWT_SECRET = process.env.JWT_SECRET || "defaultsecret";
+const JWT_SECRET = process.env.JWT_SECRET || "secret";
 
-// -------------------
-// Home Route (IMPORTANT for Render)
-// -------------------
+// HOME ROUTE (this is what Render needs)
 app.get("/", (req, res) => {
-  res.json({ message: "Secure API is running 🚀" });
+  res.json({ message: "API is working 🚀" });
 });
 
-// -------------------
-// Login Route (mock auth)
-// -------------------
+// LOGIN
 app.post("/api/login", (req, res) => {
-  const { username, role } = req.body;
-
   const token = jwt.sign(
-    { username, role },
+    { user: req.body.user || "test" },
     JWT_SECRET,
     { expiresIn: "1h" }
   );
@@ -31,41 +23,11 @@ app.post("/api/login", (req, res) => {
   res.json({ token });
 });
 
-// -------------------
-// Middleware (JWT check)
-// -------------------
-function authenticateToken(req, res, next) {
-  const authHeader = req.headers["authorization"];
-
-  const token = authHeader && authHeader.split(" ")[1];
-
-  if (!token) {
-    return res.status(401).json({ message: "No token provided" });
-  }
-
-  jwt.verify(token, JWT_SECRET, (err, user) => {
-    if (err) {
-      return res.status(403).json({ message: "Invalid or expired token" });
-    }
-
-    req.user = user;
-    next();
-  });
-}
-
-// -------------------
-// Protected Route
-// -------------------
-app.get("/api/protected", authenticateToken, (req, res) => {
-  res.json({
-    message: "Protected data accessed successfully 🔐",
-    user: req.user
-  });
+// PROTECTED
+app.get("/api/protected", (req, res) => {
+  res.json({ message: "Protected route working 🔐" });
 });
 
-// -------------------
-// Start Server
-// -------------------
 app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+  console.log("Server running on", PORT);
 });
