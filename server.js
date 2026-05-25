@@ -11,30 +11,34 @@ app.use(express.json());
 
 /*
 =========================
-DEBUG ENV
+LOG ENV
 =========================
 */
-console.log("MONGO_URI:", process.env.MONGO_URI);
+console.log("ENV LOADED ✔");
+console.log("MONGO_URI:", process.env.MONGO_URI ? "SET" : "NOT SET");
 
 /*
 =========================
 USER MODEL
 =========================
 */
-const userSchema = new mongoose.Schema({
-  username: String,
-  password: String,
-});
+const userSchema = new mongoose.Schema(
+  {
+    username: { type: String, required: true, unique: true },
+    password: { type: String, required: true },
+  },
+  { timestamps: true }
+);
 
 const User = mongoose.model("User", userSchema);
 
 /*
 =========================
-ROUTES
+ROUTES (NO DB CHECK HERE)
 =========================
 */
 
-// Root
+// Health
 app.get("/", (req, res) => {
   res.json({
     message: "API is running successfully 🚀",
@@ -47,19 +51,21 @@ app.post("/register", async (req, res) => {
   try {
     const { username, password } = req.body;
 
+    if (!username || !password) {
+      return res.status(400).json({ error: "Username and password required" });
+    }
+
     const existingUser = await User.findOne({ username });
     if (existingUser) {
-      return res.status(400).json({ error: "User already exists" });
+      return res.status(409).json({ error: "User already exists" });
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    const user = new User({
+    await User.create({
       username,
       password: hashedPassword,
     });
-
-    await user.save();
 
     res.status(201).json({
       message: "User registered successfully",
@@ -101,12 +107,12 @@ app.post("/login", async (req, res) => {
   }
 });
 
-// Dashboard (Protected)
+// Dashboard
 app.get("/dashboard", (req, res) => {
   const authHeader = req.headers.authorization;
 
-  if (!authHeader) {
-    return res.status(401).json({ error: "No token provided" });
+  if (!authHeader || !authHeader.startsWith("Bearer ")) {
+    return res.status(401).json({ error: "Token missing or invalid" });
   }
 
   const token = authHeader.split(" ")[1];
@@ -119,7 +125,7 @@ app.get("/dashboard", (req, res) => {
       user: decoded,
     });
   } catch (err) {
-    res.status(401).json({ error: "Invalid token" });
+    res.status(401).json({ error: "Invalid or expired token" });
   }
 });
 
@@ -130,30 +136,31 @@ app.use((req, res) => {
 
 /*
 =========================
-DB CONNECTION (FIXED FOR RENDER)
+REAL PRODUCTION DB STARTUP (NO LIES)
 =========================
 */
-const connectDB = async () => {
+const PORT = process.env.PORT || 3000;
+
+const startServer = async () => {
   try {
+    console.log("Connecting to MongoDB...");
+
     await mongoose.connect(process.env.MONGO_URI, {
       serverSelectionTimeoutMS: 30000,
     });
 
     console.log("MongoDB Connected Successfully 🚀");
+
+    app.listen(PORT, () => {
+      console.log(`Server running on port ${PORT}`);
+    });
   } catch (err) {
-    console.log("MongoDB Connection Error:", err.message);
+    console.error("❌ CRITICAL: MongoDB connection failed");
+    console.error(err.message);
+
+    // HARD FAIL (real-world behavior)
+    process.exit(1);
   }
 };
 
-/*
-=========================
-START SERVER ONLY AFTER DB CONNECTS
-=========================
-*/
-const PORT = process.env.PORT || 3000;
-
-connectDB().then(() => {
-  app.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
-  });
-});
+startServer();
