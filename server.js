@@ -30,9 +30,11 @@ const User = mongoose.model("User", userSchema);
 
 /*
 =========================
-ROOT ROUTE
+ROUTES
 =========================
 */
+
+// Root
 app.get("/", (req, res) => {
   res.json({
     message: "API is running successfully 🚀",
@@ -40,14 +42,15 @@ app.get("/", (req, res) => {
   });
 });
 
-/*
-=========================
-REGISTER ROUTE
-=========================
-*/
+// Register
 app.post("/register", async (req, res) => {
   try {
     const { username, password } = req.body;
+
+    const existingUser = await User.findOne({ username });
+    if (existingUser) {
+      return res.status(400).json({ error: "User already exists" });
+    }
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
@@ -60,22 +63,13 @@ app.post("/register", async (req, res) => {
 
     res.status(201).json({
       message: "User registered successfully",
-      user: {
-        username: user.username,
-      },
     });
   } catch (error) {
-    res.status(500).json({
-      error: error.message,
-    });
+    res.status(500).json({ error: error.message });
   }
 });
 
-/*
-=========================
-LOGIN ROUTE
-=========================
-*/
+// Login
 app.post("/login", async (req, res) => {
   try {
     const { username, password } = req.body;
@@ -103,17 +97,11 @@ app.post("/login", async (req, res) => {
       token,
     });
   } catch (error) {
-    res.status(500).json({
-      error: error.message,
-    });
+    res.status(500).json({ error: error.message });
   }
 });
 
-/*
-=========================
-PROTECTED ROUTE (FIXED)
-=========================
-*/
+// Dashboard (Protected)
 app.get("/dashboard", (req, res) => {
   const authHeader = req.headers.authorization;
 
@@ -135,35 +123,37 @@ app.get("/dashboard", (req, res) => {
   }
 });
 
-/*
-=========================
-404 HANDLER
-=========================
-*/
+// 404
 app.use((req, res) => {
-  res.status(404).json({
-    error: "Route not found",
-  });
+  res.status(404).json({ error: "Route not found" });
 });
 
 /*
 =========================
-CONNECT DB + START SERVER
+DB CONNECTION (FIXED FOR RENDER)
+=========================
+*/
+const connectDB = async () => {
+  try {
+    await mongoose.connect(process.env.MONGO_URI, {
+      serverSelectionTimeoutMS: 30000,
+    });
+
+    console.log("MongoDB Connected Successfully 🚀");
+  } catch (err) {
+    console.log("MongoDB Connection Error:", err.message);
+  }
+};
+
+/*
+=========================
+START SERVER ONLY AFTER DB CONNECTS
 =========================
 */
 const PORT = process.env.PORT || 3000;
 
-mongoose
-  .connect(process.env.MONGO_URI, {
-    serverSelectionTimeoutMS: 30000,
-  })
-  .then(() => {
-    console.log("MongoDB Connected Successfully 🚀");
-
-    app.listen(PORT, () => {
-      console.log(`Server running on port ${PORT}`);
-    });
-  })
-  .catch((err) => {
-    console.log("MongoDB Connection Error:", err.message);
+connectDB().then(() => {
+  app.listen(PORT, () => {
+    console.log(`Server running on port ${PORT}`);
   });
+});
